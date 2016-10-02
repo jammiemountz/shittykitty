@@ -3,9 +3,10 @@ var app = express();
 var path = require('path');
 var pg = require('pg');
 
-
+// postgres://yzjbpbvlspnfki:MXpfTCsB-TOY2LQd_MbwpX5kbL@ec2-54-225-81-90.compute-1.amazonaws.com:5432/d5sfp9vtqj8hue
 app.get('/db', function (request, response) {
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+  // pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+  pg.connect("//yzjbpbvlspnfki:MXpfTCsB-TOY2LQd_MbwpX5kbL@ec2-54-225-81-90.compute-1.amazonaws.com:5432/d5sfp9vtqj8hue", function(err, client, done) {
     client.query('SELECT * FROM test_table', function(err, result) {
       done();
       if (err)
