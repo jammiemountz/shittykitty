@@ -7,13 +7,16 @@ pg.defaults.ssl = true;
 
 var env = process.env.PORT ? 'prod' : 'dev';
 var port = process.env.PORT ? process.env.PORT : 8080;
-var databaseId = env==='dev' ? 100 : 1;
+var databaseId = env==='dev' ? 'poopdev' : 'poop';
 var dburl = process.env.DATABASE_URL;
+
 query.connectionParameters = dburl;
 
-query('CREATE TABLE IF NOT EXISTS items(id SERIAL PRIMARY KEY, amount INTEGER not null)', function() {
-  query('INSERT INTO items VALUES (1,0)');
-  query('INSERT INTO items VALUES (100,0)');
+// create dev and prod tables if they dont exist
+query('CREATE TABLE IF NOT EXISTS poop(id SERIAL PRIMARY KEY, date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW())', function() {
+});
+query('CREATE TABLE IF NOT EXISTS poopdev(id SERIAL PRIMARY KEY, date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW())', function() {
+  query('INSERT INTO poopdev VALUES (DEFAULT, DEFAULT)');
 });
 
 app.use(function(req, res, next) {
@@ -30,29 +33,40 @@ app.get('/', function(req, res) {
 
 app.get('/api/pooped', function(req, res) {
   var amount;
-  query('SELECT * FROM items WHERE id=' + databaseId,function(err, rows, result){
-    rows.forEach(function(row) {
-      amount = row.amount + 1;
-    })
-    query('UPDATE items SET amount=' + amount + ' WHERE id=' + databaseId, function(err, rows, result) {
-      if (err) {
-        res.send(err);
-        res.end();
-      }
+  query('INSERT INTO ' + databaseId + ' VALUES (DEFAULT, DEFAULT)', function(err,rows,result) {
+    if (err) {
+      res.send(JSON.stringify({ error: err }));
+      res.end();
+    } else {
       res.send(JSON.stringify({ data: 'success' }))
       res.end();
-    })
+    }
   });
 });
 
 app.get('/api/getpoop', function(req, res) {
   var amount;
-  query('SELECT * FROM items WHERE id=' + databaseId,function(err, rows, result){
-    rows.forEach(function(row) {
-      amount = row.amount;
-    })
-    res.send(JSON.stringify({ data: amount }));
-    res.end();
+  query('SELECT * FROM ' + databaseId + ' ORDER BY id DESC LIMIT 1', function(err, rows, result){
+    if (err) {
+      res.send(JSON.stringify({ error: err }));
+      res.end();
+    } else {
+      res.send(JSON.stringify({ data: rows[0] }));
+      res.end();
+    }
+  });
+});
+
+app.get('/api/getfirstpoop', function(req, res) {
+  var amount;
+  query('SELECT * FROM ' + databaseId + ' ORDER BY id ASC LIMIT 1', function(err, rows, result){
+    if (err) {
+      res.send(JSON.stringify({ error: err }));
+      res.end();
+    } else {
+      res.send(JSON.stringify({ data: rows[0] }));
+      res.end();
+    }
   });
 });
 
