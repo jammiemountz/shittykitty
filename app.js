@@ -41,4 +41,4 @@ app.get('/api/getpoop', function(req, res) {
 });
 
 console.log('live at http://localhost:8080/')
-app.listen(8080);
+app.listen(process.env.PORT || 8080);
